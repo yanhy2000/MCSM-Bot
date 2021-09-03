@@ -1,0 +1,18 @@
+{
+  "name": "terraria-bot",
+  "version": "1.0.0",
+  "description": "Interact with Terraria server in QQ group, query data, manage server, etc",
+  "main": "index.js",
+  "scripts": {
+    "bot": "node ./index.js"
+  },
+  "author": "yanhy2000",
+  "license": "MIT",
+  "dependencies": {
+    "http": "^0.0.1-security",
+    "oicq": "^1.19.4"
+  },
+  "devDependencies": {
+    "@types/node": "^16.4.13"
+  }
+}
