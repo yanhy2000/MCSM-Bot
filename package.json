@@ -9,6 +9,7 @@
   "author": "yanhy2000",
   "license": "MIT",
   "dependencies": {
+    "dgram": "^1.0.1",
     "http": "^0.0.1-security",
     "oicq": "^1.19.4"
   },

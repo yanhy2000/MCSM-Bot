@@ -1,7 +1,7 @@
 "use strict"
-const { bot } = require("./index")
-
-var conf = require("./index");
+const { bot } = require("../index");
+const { Server } = require("../lib/Server");
+var conf = require("../index");
 var http = require('http');
 
 var groupid = conf.qgroup;//传入绑定群号
@@ -32,9 +32,27 @@ function httpget(url,callback)
 }
 
 //查询服务器函数
-// function motdbe(ip,port)
+function motd(ip,port)
+{
+	ser = new Server(ip, port=19132);
+	ser.motdbe()
+	setTimeout(() => {return ser.serverInfo}, 1000);
+}
 // {
-// }
+// 	code: 200,
+// 	status: 'online',
+// 	ip: 'tr.luoyeling.top',
+// 	port: 19132,
+// 	motd: '★落叶岭★创造服',
+// 	protocol: '448',
+// 	version: '1.17.10',
+// 	online: '0',
+// 	upperLimit: '15',
+// 	gamemode: 'Survival',
+// 	difficulty: '1',
+// 	port_ipv6: '19133',
+// 	delay: '131ms'
+//   }
 
 //正则匹配函数
 function res(pattern,str)
@@ -91,7 +109,6 @@ bot.on("message.group", function (e) {
 					server_name = slist[0];
 					let url = "http://"+ip+":"+port+"/api/status/"+server_name;
 					httpget(url,status=>{
-						console.log(status)
 						if((JSON.parse(status)).status==true){
 						e.reply("默认服务器"+server_name+"为启动状态！状态码："+(JSON.parse(status)).status)}else{
 							e.reply("默认服务器"+server_name+"为关闭状态！状态码："+(JSON.parse(status)).status)}});
@@ -101,7 +118,6 @@ bot.on("message.group", function (e) {
 					if(slist.indexOf(server_name)!=-1){
 						let url = "http://"+ip+":"+port+"/api/status/"+server_name;
 						httpget(url,status=>{
-							console.log((JSON.parse(status)).status);
 							if((JSON.parse(status)).status==true){
 							e.reply("指定服务器"+server_name+"为启动状态！状态码："+(JSON.parse(status)).status)}else{
 								e.reply("指定服务器"+server_name+"为关闭状态！状态码："+(JSON.parse(status)).status)}})

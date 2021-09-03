@@ -2,8 +2,38 @@
 
 
 var fs = require('fs');
-let qqdata = fs.readFileSync('config.json');
-let config = JSON.parse(qqdata);
+let path = require('path');
+fs.access("./config.json", fs.constants.F_OK, (err) => {
+	if (err) {
+	  console.log("配置文件不存在！准备自动创建...")
+	  let jsonData = {
+		"qq": 123456,
+		"login_qrcode":true,
+		"password":123456,
+		"admin_qq":[114514,1919810],
+		"gruop": [11444444],
+		"mcsm_ip":"127.0.0.1",
+		"port":23333,
+		"key":"123456780",
+		"mcsm_admin":false,
+		"server_list":["bds","test"]
+	}
+	let text = JSON.stringify(jsonData,null,'\t')
+	let file = path.join(__dirname, 'config.json');
+	fs.writeFile(file, text, function (err) {
+		if (err) {
+			console.log("文件创建失败，请手动检查！");
+		} else {
+			setTimeout(()=>console.log('文件创建成功！文件名：' + file+"\n第一次文件创建完成请手动修改配置文件后使用！3s后准备强制退出..."),1000);
+			setTimeout(function(){process.exit(0)},4000)//强制退出，延时3s
+		}
+	});
+
+	}else{
+    console.log("检测配置文件存在，准备启动BOT...") 
+		
+var data = fs.readFileSync('config.json');
+let config = JSON.parse(data);
 const loginway = config.login_qrcode;//登陆方式，默认为为true；（true：扫码登陆，false：密码登陆）
 const qgruop = config.gruop;//群号绑定
 const admin = config.admin_qq;//机器人管理员
@@ -64,13 +94,13 @@ function loadPlugins()
 	if(isadmin)
 	{
 		console.log("配置文件检测用户为MCSM管理员,已解锁高级权限");
-		delete require.cache[require.resolve("./plug-admin")];
-		setTimeout(function(){require("./plug-admin")},300);
+		delete require.cache[require.resolve("./plugins/plug-admin")];
+		setTimeout(function(){require("./plugins/plug-admin")},300);
 	}
 	else{
 		console.log("配置文件检测用户为MCSM普通用户,使用普通权限");
-		delete require.cache[require.resolve("./plug-user")];
-		setTimeout(function(){require("./plug-user")},300);
+		delete require.cache[require.resolve("./plugins/plug-user")];
+		setTimeout(function(){require("./plugins/plug-user")},300);
 	}
 }
 loadPlugins();
@@ -84,9 +114,4 @@ bot.on("message.group",function(e){
 		
 	}
 })
-
-
-
-
-
-
+}});

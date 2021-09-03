@@ -1,7 +1,7 @@
 "use strict"
-const { bot } = require("./index")
+const { bot } = require("../index")
 
-var conf = require("./index");
+var conf = require("../index");
 var http = require('http');
 var groupid = conf.qgroup;
 var token = conf.token;
