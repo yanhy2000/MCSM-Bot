@@ -1,7 +1,7 @@
 {
-  "name": "terraria-bot",
+  "name": "MCSM-bot",
   "version": "1.0.0",
-  "description": "Interact with Terraria server in QQ group, query data, manage server, etc",
+  "description": "mcsm管理用机器人，管理员与用户可分开使用",
   "main": "index.js",
   "scripts": {
     "bot": "node ./index.js"
