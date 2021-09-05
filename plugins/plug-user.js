@@ -90,6 +90,14 @@ function res(pattern,str)
 			var pat = /^重启服务器$/;
 			return pat.test(str)
 		};
+		case "send":{
+			var pat = /^重启服务器\s(.+)$/;
+			return pat.test(str);
+		};
+		case "send-only":{
+			var pat = /^重启服务器$/;
+			return pat.test(str)
+		};
 	}
 }
 
@@ -158,7 +166,6 @@ bot.on("message.group", function (e) {
 			}
 		}
 
-
 		//关服,1 秒内只能请求一次,GET
 		if(res("stop",say) || res("stop-only",say)){
 			if(admin.indexOf(user)!=-1){//管理员
@@ -222,6 +229,10 @@ bot.on("message.group", function (e) {
 				e.reply("本指令仅机器人管理员使用！")
 			}
 		}
+
+		//	向服务器发送指令,1 秒内只能请求一次,POST
+		//POST方法，未实现
+
 
 }
 })
