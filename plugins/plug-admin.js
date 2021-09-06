@@ -38,21 +38,6 @@ function motd(ip,port)
 	ser.motdbe()
 	setTimeout(() => {return ser.serverInfo}, 1000);
 }
-// {
-// 	code: 200,
-// 	status: 'online',
-// 	ip: 'tr.luoyeling.top',
-// 	port: 19132,
-// 	motd: '★落叶岭★创造服',
-// 	protocol: '448',
-// 	version: '1.17.10',
-// 	online: '0',
-// 	upperLimit: '15',
-// 	gamemode: 'Survival',
-// 	difficulty: '1',
-// 	port_ipv6: '19133',
-// 	delay: '131ms'
-//   }
 
 //正则匹配函数
 function res(pattern,str)
