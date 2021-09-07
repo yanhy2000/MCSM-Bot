@@ -1,4 +1,5 @@
 "use strict"
+//admin部分
 const { bot } = require("../index");
 const { Server } = require("../lib/Server");
 var conf = require("../index");
