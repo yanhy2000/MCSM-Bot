@@ -3,6 +3,8 @@ const { bot } = require("../index");
 const { Server } = require("../lib/Server");
 var conf = require("../index");
 var http = require('http');
+var querystring = require('querystring');
+var util = require('util');
 
 var groupid = conf.qgroup;//传入绑定群号
 var admin = conf.admin;//传入机器人管理员
@@ -13,7 +15,7 @@ var slist = conf.slist;//服务端列表
 
 
 
-//关键函数，用于http访问与回传参数
+//GET请求
 function httpget(url,callback)
 {
 	http.get(url,(res)=>{
@@ -30,6 +32,26 @@ function httpget(url,callback)
 		callback(null)
 	})
 }
+
+//POST请求
+// function httppost(url,name,cmd,callback)
+// {
+// 	http.createServer(function(req, res){
+// 		// 定义了一个post变量，用于暂存请求体的信息
+// 		var post = 'name='+name+'command='+cmd;
+	 
+// 		// 通过req的data事件监听函数，每当接受到请求体的数据，就累加到post变量中
+// 		req.on('data', function(chunk){    
+// 			post += chunk;
+// 		});
+	 
+// 		// 在end事件触发后，通过querystring.parse将post解析为真正的POST请求格式，然后向客户端返回。
+// 		req.on('end', function(){    
+// 			post = querystring.parse(post);
+// 			res.end(util.inspect(post));
+// 		});
+// 	});
+// }
 
 //查询服务器函数
 function motd(ip,port)
@@ -217,7 +239,7 @@ bot.on("message.group", function (e) {
 		}
 
 		//	向服务器发送指令,1 秒内只能请求一次,POST
-		//POST方法，未实现
+		//POST方法，待实现
 
 
 }
