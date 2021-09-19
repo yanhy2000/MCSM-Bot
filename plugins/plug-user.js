@@ -13,13 +13,15 @@ var port = conf.port;//传入端口
 var key = conf.key;
 var slist = conf.slist;//服务端列表
 
-
+function logger(e){
+	console.log("[MCSM-INFO]",e);
+}
 
 //GET请求
 function httpget(url,callback)
 {
 	http.get(url,(res)=>{
-		var html = "";
+		let html = "";
 		res.on("data",(data)=>{
 			html+=data
 		})
@@ -34,26 +36,38 @@ function httpget(url,callback)
 }
 
 //POST请求
-// function httppost(url,name,cmd,callback)
-// {
-// 	http.createServer(function(req, res){
-// 		// 定义了一个post变量，用于暂存请求体的信息
-// 		var post = 'name='+name+'command='+cmd;
-	 
-// 		// 通过req的data事件监听函数，每当接受到请求体的数据，就累加到post变量中
-// 		req.on('data', function(chunk){    
-// 			post += chunk;
-// 		});
-	 
-// 		// 在end事件触发后，通过querystring.parse将post解析为真正的POST请求格式，然后向客户端返回。
-// 		req.on('end', function(){    
-// 			post = querystring.parse(post);
-// 			res.end(util.inspect(post));
-// 		});
-// 	});
-// }
+function httppost(str,path,callback)
+{
+	const data = JSON.stringify(str);
+	const options = {
+		hostname: ip,
+		port: port,
+		path: path,
+		method: 'POST',
+		headers: {
+		'Content-Type': 'application/json',
+		'Content-Length': data.length
+		}
+	}
+	const req = http.request(options, res => {
+		let html = "";
+		res.on('data', d => {
+			html+=d;
+		});
+		res.on("end",()=>{
+			if(callback){
+				callback(html);
+			}
+		})
+	})
+	req.on('error', error => {
+		callback(error)
+	});
+	req.write(data);
+	req.end();
+}
 
-//查询服务器函数
+//motd
 function motd(ip,port)
 {
 	ser = new Server(ip, port=19132);
@@ -98,13 +112,17 @@ function res(pattern,str)
 			var pat = /^重启服务器$/;
 			return pat.test(str)
 		};
-		case "send":{
-			var pat = /^重启服务器\s(.+)$/;
+		case "cmd":{
+			var pat = /\/cmd:(.+)/;
 			return pat.test(str);
 		};
-		case "send-only":{
-			var pat = /^重启服务器$/;
+		case "cmd-only":{
+			var pat = /\/cmd\s(.+)/;
 			return pat.test(str)
+		};
+		case "motd":{
+			var pat = /\!motd (.+)/;
+			return pat.test(str);
 		};
 	}
 }
@@ -127,7 +145,7 @@ bot.on("message.group", function (e) {
 					httpget(url,status=>{
 						if((JSON.parse(status)).status==true){
 						e.reply("默认服务器"+server_name+"为启动状态！状态码："+(JSON.parse(status)).status)}else{
-							e.reply("默认服务器"+server_name+"为关闭状态！状态码："+(JSON.parse(status)).status)}});
+							e.reply("默认服务器"+server_name+"为关闭状态！状态码："+(JSON.parse(status)).status);logger(status)}});
 				}else if(out.length>=2)
 				{//看指定的服务端
 					server_name = out[1];
@@ -136,7 +154,7 @@ bot.on("message.group", function (e) {
 						httpget(url,status=>{
 							if((JSON.parse(status)).status==true){
 							e.reply("指定服务器"+server_name+"为启动状态！状态码："+(JSON.parse(status)).status)}else{
-								e.reply("指定服务器"+server_name+"为关闭状态！状态码："+(JSON.parse(status)).status)}})
+								e.reply("指定服务器"+server_name+"为关闭状态！状态码："+(JSON.parse(status)).status);logger(status)}})
 					}else{
 						e.reply("服务器列表找不到该服务器！")
 					}
@@ -155,7 +173,7 @@ bot.on("message.group", function (e) {
 					httpget(url,status=>{
 						if((JSON.parse(status)).status==200){
 						e.reply("默认服务器"+server_name+"启动执行成功！状态码："+(JSON.parse(status)).status)}else{
-							e.reply("默认服务器"+server_name+"启动执行异常！状态码："+(JSON.parse(status)).status)}});
+							e.reply("默认服务器"+server_name+"启动执行异常！信息："+(JSON.parse(status)).error);logger(status)}});
 				}else if(out.length>=2)
 				{//看指定的服务端
 					server_name = out[1];
@@ -164,7 +182,7 @@ bot.on("message.group", function (e) {
 						httpget(url,status=>{
 							if((JSON.parse(status)).status==200){
 							e.reply("指定服务器"+server_name+"启动执行成功！状态码："+(JSON.parse(status)).status)}else{
-								e.reply("指定服务器"+server_name+"启动执行异常！状态码："+(JSON.parse(status)).status)}})
+								e.reply("指定服务器"+server_name+"启动执行异常！信息："+(JSON.parse(status)).error);logger(status)}})
 					}else{
 						e.reply("服务器列表找不到该服务器！")
 					}
@@ -186,17 +204,16 @@ bot.on("message.group", function (e) {
 					httpget(url,status=>{
 						if((JSON.parse(status)).status==200){
 						e.reply("默认服务器"+server_name+"关闭执行成功！状态码："+(JSON.parse(status)).status)}else{
-							e.reply("默认服务器"+server_name+"关闭执行异常！状态码："+(JSON.parse(status)).status)}});
+							e.reply("默认服务器"+server_name+"关闭执行异常！信息："+(JSON.parse(status)).error);logger(status)}});
 				}else if(out.length>=2)
 				{//看指定的服务端
 					server_name = out[1];
 					if(slist.indexOf(server_name)!=-1){
 						let url = "http://"+ip+":"+port+"/api/stop_server/"+server_name+"?apikey="+key;
 						httpget(url,status=>{
-							console.log((JSON.parse(status)).status);
 							if((JSON.parse(status)).status==200){
 							e.reply("指定服务器"+server_name+"关闭执行成功！状态码："+(JSON.parse(status)).status)}else{
-								e.reply("指定服务器"+server_name+"关闭执行异常！状态码："+(JSON.parse(status)).status)}})
+								e.reply("指定服务器"+server_name+"关闭执行异常！信息："+(JSON.parse(status)).error);logger(status)}})
 					}else{
 						e.reply("服务器列表找不到该服务器！")
 					}
@@ -218,17 +235,16 @@ bot.on("message.group", function (e) {
 					httpget(url,status=>{
 						if((JSON.parse(status)).status==200){
 						e.reply("默认服务器"+server_name+"重启执行成功！状态码："+(JSON.parse(status)).status)}else{
-							e.reply("默认服务器"+server_name+"重启执行异常！状态码："+(JSON.parse(status)).status)}});
+							e.reply("默认服务器"+server_name+"重启执行异常！信息："+(JSON.parse(status)).error);logger(status)}});
 				}else if(out.length>=2)
 				{//看指定的服务端
 					server_name = out[1];
 					if(slist.indexOf(server_name)!=-1){
 						let url = "http://"+ip+":"+port+"/api/restart_server/"+server_name+"?apikey="+key;
 						httpget(url,status=>{
-							console.log((JSON.parse(status)).status);
 							if((JSON.parse(status)).status==200){
 							e.reply("指定服务器"+server_name+"重启执行成功！状态码："+(JSON.parse(status)).status)}else{
-								e.reply("指定服务器"+server_name+"重启执行异常！状态码："+(JSON.parse(status)).status)}})
+								e.reply("指定服务器"+server_name+"重启执行异常！信息："+(JSON.parse(status)).error);logger(status)}})
 					}else{
 						e.reply("服务器列表找不到该服务器！")
 					}
@@ -239,8 +255,84 @@ bot.on("message.group", function (e) {
 		}
 
 		//	向服务器发送指令,1 秒内只能请求一次,POST
-		//POST方法，待实现
+		if(res("cmd",say) || res("cmd-only",say)){
+			if(admin.indexOf(user)!=-1){//管理员
+				let server_name="";
+				let url = "/api/execute/?apikey="+key;
+				let str = "";
+				if(res("cmd-only",say))//格式不同，分开处理，先处理单服务端
+				{
+					let out = say.split(' ');
+					let len = out.length;
+					
+					server_name = slist[0];
+					for(let i=1;i<len;i++)
+					{
+						str = str + out[i] + " ";
+					}
+					let cmd = {"name":server_name,"command":str}
+					httppost(cmd,url,status=>{
+						if((JSON.parse(status)).status==200){
+							e.reply("指令已成功发送至"+server_name+"! 状态码："+(JSON.parse(status)).status)}else{
+							e.reply("指令未发送至"+server_name+"! 信息："+(JSON.parse(status)).error);logger(status)}});
+				}else if(res("cmd",say))//处理指定服务端
+				{//bdstet whitelist add "ss dfd fgh"
+					let rule = /\/cmd:(.+)/;
+					let out1 = rule.exec(say)[1];
+					let out = out1.split(' ');
+					let len = out.length;
+					server_name = out[0];
+					for(let i=1;i<len;i++)
+					{
+						str = str + out[i] + " ";
+					}
+					let cmd = {"name":server_name,"command":str}
+					if(slist.indexOf(server_name)!=-1){
+						httppost(cmd,url,status=>{
+							if((JSON.parse(status)).status==200){
+								e.reply("指令已成功发送至"+server_name+"! 状态码："+(JSON.parse(status)).status)}else{
+								e.reply("指令未发送至"+server_name+"! 信息："+(JSON.parse(status)).error);logger(status)}});
+					}else{
+						e.reply("服务器列表找不到该服务器！")
+					}
+				}
+			}else{
+				e.reply("本指令仅机器人管理员使用！")
+			}
+		}
 
+		//motd请求,需要延迟,Function
+		// if(res("motd",say)){
+		// 	console.log("111")
+		// 	if(admin.indexOf(user)!=-1)
+		// 	{
+		// 		console.log("2");
+		// 		let out = say.split(' ');
+		// 		let ip = out[1];
+		// 		let port = "";
+		// 		let len = out.length;
+		// 		if(len==3)
+		// 		{
+		// 			port = out[2];
+		// 			let end = motd(ip,port);
+		// 			console.log(end)
+		// 			e.reply(end)
+		// 		}
+		// 		else if(len == 2)
+		// 		{
+		// 			let end = motd(ip,"");
+		// 			e.reply(end)
+		// 		}
+
+				// port = out[2];
+				
+				
+				
+		// 	}
+		// 	else{
+		// 		e.reply("本指令仅机器人管理员使用！")
+		// 	}
+		// }
 
 }
 })
